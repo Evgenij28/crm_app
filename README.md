@@ -188,3 +188,83 @@ Open app:
 Register first user:
 
 - `POST http://<SERVER_IP>:3000/api/auth/register`
+
+## Full step-by-step install commands (Ubuntu + Docker run)
+
+Use this when you want to copy/paste all commands in order.
+
+### 0) Docker and permissions
+
+```bash
+sudo apt update
+sudo apt install -y docker.io curl
+sudo systemctl enable --now docker
+sudo usermod -aG docker $USER
+newgrp docker
+docker ps
+```
+
+### 1) Optional: login to GHCR (if package is private)
+
+```bash
+echo "PASTE_REAL_GITHUB_PAT_HERE" | docker login ghcr.io -u Evgenij28 --password-stdin
+```
+
+### 2) Full install block with test secrets
+
+```bash
+DB_PASS='TestDbPass_12345'
+JWT_SECRET='TestJwtSecret_12345_ChangeInProduction'
+
+docker pull ghcr.io/evgenij28/crm-app-api:latest
+docker pull ghcr.io/evgenij28/crm-app-web:latest
+
+docker rm -f crm-web crm-api crm-postgres 2>/dev/null || true
+docker network rm crm-net 2>/dev/null || true
+docker volume rm crm-postgres-data 2>/dev/null || true
+
+docker network create crm-net
+docker volume create crm-postgres-data
+
+docker run -d \
+  --name crm-postgres \
+  --network crm-net \
+  --restart always \
+  -e POSTGRES_DB=crm_core \
+  -e POSTGRES_USER=postgres \
+  -e POSTGRES_PASSWORD="$DB_PASS" \
+  -v crm-postgres-data:/var/lib/postgresql/data \
+  postgres:16
+
+until docker run --rm --network crm-net postgres:16 \
+  pg_isready -h crm-postgres -p 5432 -U postgres -d crm_core >/dev/null 2>&1; do
+  sleep 2
+done
+
+docker run -d \
+  --name crm-api \
+  --network crm-net \
+  --restart always \
+  -e DATABASE_URL="postgresql://postgres:${DB_PASS}@crm-postgres:5432/crm_core?schema=public" \
+  -e JWT_SECRET="$JWT_SECRET" \
+  -e PORT=3000 \
+  ghcr.io/evgenij28/crm-app-api:latest
+
+docker run -d \
+  --name crm-web \
+  --network crm-net \
+  --restart always \
+  -p 3000:80 \
+  ghcr.io/evgenij28/crm-app-web:latest
+
+docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+curl -i http://localhost:3000/api/health
+```
+
+### 3) First account
+
+Open in browser:
+
+- `http://<SERVER_IP>:3000`
+
+On login page switch to `Register` and create the first account.
