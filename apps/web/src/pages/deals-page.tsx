@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '../api/client';
 import type { FormEvent } from 'react';
@@ -10,8 +11,18 @@ interface CreateDealPayload {
   stage?: string;
 }
 
+const dealStageLabels: Record<string, string> = {
+  NEW: 'Новая',
+  QUALIFICATION: 'Квалификация',
+  PROPOSAL: 'Предложение',
+  NEGOTIATION: 'Переговоры',
+  WON: 'Выиграна',
+  LOST: 'Проиграна',
+};
+
 export function DealsPage() {
   const queryClient = useQueryClient();
+  const [search, setSearch] = useState('');
   const [form, setForm] = useState<CreateDealPayload>({
     title: '',
     amount: '',
@@ -39,12 +50,23 @@ export function DealsPage() {
     createMutation.mutate(form);
   };
 
+  const filteredDeals = (dealsQuery.data ?? []).filter((deal) =>
+    deal.title.toLowerCase().includes(search.toLowerCase()),
+  );
+
   return (
     <section className="page">
-      <h2>Deals</h2>
+      <div className="page-header">
+        <h2>Сделки</h2>
+        <input
+          placeholder="Поиск сделки"
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+        />
+      </div>
       <form className="card form inline" onSubmit={onSubmit}>
         <input
-          placeholder="Deal title"
+          placeholder="Название сделки"
           value={form.title}
           onChange={(event) =>
             setForm((previous) => ({ ...previous, title: event.target.value }))
@@ -52,7 +74,7 @@ export function DealsPage() {
           required
         />
         <input
-          placeholder="Amount"
+          placeholder="Сумма"
           value={form.amount}
           onChange={(event) =>
             setForm((previous) => ({ ...previous, amount: event.target.value }))
@@ -64,26 +86,30 @@ export function DealsPage() {
             setForm((previous) => ({ ...previous, stage: event.target.value }))
           }
         >
-          <option value="NEW">NEW</option>
-          <option value="QUALIFICATION">QUALIFICATION</option>
-          <option value="PROPOSAL">PROPOSAL</option>
-          <option value="NEGOTIATION">NEGOTIATION</option>
-          <option value="WON">WON</option>
-          <option value="LOST">LOST</option>
+          <option value="NEW">Новая</option>
+          <option value="QUALIFICATION">Квалификация</option>
+          <option value="PROPOSAL">Предложение</option>
+          <option value="NEGOTIATION">Переговоры</option>
+          <option value="WON">Выиграна</option>
+          <option value="LOST">Проиграна</option>
         </select>
         <button type="submit" disabled={createMutation.isPending}>
-          Add deal
+          Добавить сделку
         </button>
       </form>
 
       <div className="card">
-        {dealsQuery.isLoading ? <p>Loading deals...</p> : null}
-        {dealsQuery.isError ? <p className="error">Failed to load deals.</p> : null}
+        {dealsQuery.isLoading ? <p>Загрузка сделок...</p> : null}
+        {dealsQuery.isError ? <p className="error">Не удалось загрузить сделки.</p> : null}
         <ul className="list">
-          {dealsQuery.data?.map((deal) => (
+          {filteredDeals.map((deal) => (
             <li key={deal.id}>
-              <strong>{deal.title}</strong>
-              <span>{deal.stage}</span>
+              <strong>
+                <Link to={`/deals/${deal.id}`}>{deal.title}</Link>
+              </strong>
+              <span>
+                {deal.pipelineStage?.name ?? dealStageLabels[deal.stage] ?? deal.stage}
+              </span>
               <span>{deal.amount || '-'}</span>
             </li>
           ))}

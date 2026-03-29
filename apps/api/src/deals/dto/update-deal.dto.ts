@@ -21,6 +21,14 @@ export class UpdateDealDto {
   contactId?: string;
 
   @IsOptional()
+  @IsUUID()
+  pipelineId?: string;
+
+  @IsOptional()
+  @IsUUID()
+  stageId?: string;
+
+  @IsOptional()
   @IsNumberString()
   amount?: string;
 

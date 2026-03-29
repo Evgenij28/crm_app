@@ -40,8 +40,8 @@ export function LoginPage() {
     } catch {
       setError(
         mode === 'login'
-          ? 'Login failed. Check email and password.'
-          : 'Registration failed. Check all fields and try again.',
+          ? 'Не удалось войти. Проверьте email и пароль.'
+          : 'Не удалось зарегистрироваться. Проверьте все поля и попробуйте снова.',
       );
     } finally {
       setIsLoading(false);
@@ -51,7 +51,7 @@ export function LoginPage() {
   return (
     <div className="auth-page">
       <form className="card form" onSubmit={onSubmit}>
-        <h2>{mode === 'login' ? 'CRM Login' : 'CRM First Setup'}</h2>
+        <h2>{mode === 'login' ? 'Вход в CRM' : 'Первичная настройка CRM'}</h2>
         <div className="form inline">
           <button
             type="button"
@@ -61,7 +61,7 @@ export function LoginPage() {
             }}
             disabled={mode === 'login'}
           >
-            Sign in
+            Вход
           </button>
           <button
             type="button"
@@ -71,14 +71,14 @@ export function LoginPage() {
             }}
             disabled={mode === 'register'}
           >
-            Register
+            Регистрация
           </button>
         </div>
 
         {mode === 'register' ? (
           <>
             <label>
-              First name
+              Имя
               <input
                 value={firstName}
                 onChange={(event) => setFirstName(event.target.value)}
@@ -86,7 +86,7 @@ export function LoginPage() {
               />
             </label>
             <label>
-              Last name
+              Фамилия
               <input
                 value={lastName}
                 onChange={(event) => setLastName(event.target.value)}
@@ -94,7 +94,7 @@ export function LoginPage() {
               />
             </label>
             <label>
-              Organization
+              Организация
               <input
                 value={organizationName}
                 onChange={(event) => setOrganizationName(event.target.value)}
@@ -114,7 +114,7 @@ export function LoginPage() {
           />
         </label>
         <label>
-          Password
+          Пароль
           <input
             type="password"
             value={password}
@@ -126,13 +126,13 @@ export function LoginPage() {
         <button type="submit" disabled={isLoading}>
           {isLoading
             ? mode === 'login'
-              ? 'Signing in...'
-              : 'Creating account...'
+              ? 'Выполняется вход...'
+              : 'Создаем аккаунт...'
             : mode === 'login'
-              ? 'Sign in'
-              : 'Create account'}
+              ? 'Войти'
+              : 'Создать аккаунт'}
         </button>
-        <p className="hint">After registration, you are logged in automatically.</p>
+        <p className="hint">После регистрации вы автоматически войдете в систему.</p>
       </form>
     </div>
   );

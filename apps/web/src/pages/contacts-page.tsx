@@ -43,10 +43,10 @@ export function ContactsPage() {
 
   return (
     <section className="page">
-      <h2>Contacts</h2>
+      <h2>Контакты</h2>
       <form className="card form inline" onSubmit={onSubmit}>
         <input
-          placeholder="First name"
+          placeholder="Имя"
           value={form.firstName}
           onChange={(event) =>
             setForm((previous) => ({ ...previous, firstName: event.target.value }))
@@ -54,7 +54,7 @@ export function ContactsPage() {
           required
         />
         <input
-          placeholder="Last name"
+          placeholder="Фамилия"
           value={form.lastName}
           onChange={(event) =>
             setForm((previous) => ({ ...previous, lastName: event.target.value }))
@@ -62,27 +62,29 @@ export function ContactsPage() {
           required
         />
         <input
-          placeholder="Email"
+          placeholder="Эл. почта"
           value={form.email}
           onChange={(event) =>
             setForm((previous) => ({ ...previous, email: event.target.value }))
           }
         />
         <input
-          placeholder="Phone"
+          placeholder="Телефон"
           value={form.phone}
           onChange={(event) =>
             setForm((previous) => ({ ...previous, phone: event.target.value }))
           }
         />
         <button type="submit" disabled={createMutation.isPending}>
-          Add contact
+          Добавить контакт
         </button>
       </form>
 
       <div className="card">
-        {contactsQuery.isLoading ? <p>Loading contacts...</p> : null}
-        {contactsQuery.isError ? <p className="error">Failed to load contacts.</p> : null}
+        {contactsQuery.isLoading ? <p>Загрузка контактов...</p> : null}
+        {contactsQuery.isError ? (
+          <p className="error">Не удалось загрузить контакты.</p>
+        ) : null}
         <ul className="list">
           {contactsQuery.data?.map((contact) => (
             <li key={contact.id}>

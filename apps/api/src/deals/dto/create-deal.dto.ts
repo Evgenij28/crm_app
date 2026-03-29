@@ -20,6 +20,14 @@ export class CreateDealDto {
   contactId?: string;
 
   @IsOptional()
+  @IsUUID()
+  pipelineId?: string;
+
+  @IsOptional()
+  @IsUUID()
+  stageId?: string;
+
+  @IsOptional()
   @IsNumberString()
   amount?: string;
 

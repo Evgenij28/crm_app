@@ -11,7 +11,8 @@
     "dev": "concurrently -k -n api,web -c cyan,magenta \"npm run start:dev --workspace api\" \"npm run dev --workspace web\"",
     "build": "npm run build --workspace api && npm run build --workspace web",
     "lint": "npm run lint --workspace api && npm run lint --workspace web",
-    "db:migrate": "npm run prisma:migrate --workspace api"
+    "db:migrate": "npm run prisma:migrate --workspace api",
+    "smoke": "node scripts/smoke-check.mjs"
   },
   "devDependencies": {
     "concurrently": "^9.2.1"
