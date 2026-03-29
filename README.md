@@ -122,3 +122,69 @@ Body example:
   "organizationName": "Normativ CRM"
 }
 ```
+
+## Docker Run style install (without compose)
+
+This is the closest format to a single `docker run` command while keeping PostgreSQL separate.
+
+### 1) Publish images to GHCR
+
+After push to `main`, GitHub Actions workflow `.github/workflows/publish-ghcr.yml` publishes:
+
+- `ghcr.io/<github_user>/crm-app-api:latest`
+- `ghcr.io/<github_user>/crm-app-web:latest`
+
+### 2) Run containers
+
+Create network and volume:
+
+```bash
+docker network create crm-net
+docker volume create crm-postgres-data
+```
+
+Run PostgreSQL:
+
+```bash
+docker run -d \
+  --name crm-postgres \
+  --network crm-net \
+  --restart always \
+  -e POSTGRES_DB=crm_core \
+  -e POSTGRES_USER=postgres \
+  -e POSTGRES_PASSWORD=change_this_db_password \
+  -v crm-postgres-data:/var/lib/postgresql/data \
+  postgres:16
+```
+
+Run API:
+
+```bash
+docker run -d \
+  --name crm-api \
+  --network crm-net \
+  --restart always \
+  -e DATABASE_URL="postgresql://postgres:change_this_db_password@crm-postgres:5432/crm_core?schema=public" \
+  -e JWT_SECRET="change_this_very_long_secret" \
+  -e PORT=3000 \
+  ghcr.io/evgenij28/crm-app-api:latest
+```
+
+Run Web:
+
+```bash
+docker run -d \
+  --name crm-web \
+  --network crm-net \
+  --restart always \
+  -p 3000:80 \
+  ghcr.io/evgenij28/crm-app-web:latest
+```
+
+Open app:
+
+- `http://<SERVER_IP>:3000`
+
+Register first user:
+
+- `POST http://<SERVER_IP>:3000/api/auth/register`
